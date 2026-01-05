@@ -1,7 +1,8 @@
-"""Message prefilling and stop sequences."""
+"""Message prefilling and stop sequences and handling (semi-)structured data."""
 
 from anthropic import Anthropic
 from dotenv import load_dotenv
+import json
 import os
 
 _ = load_dotenv(override=True)
@@ -49,3 +50,16 @@ stop_seqs = ["5"]
 add_user_message(messages, "Count to 10")
 answer = chat(messages, stop_sequences=stop_seqs)
 print(answer)
+
+
+# Example for structured data generation
+messages = []
+
+add_user_message(messages, "Generate a very short event bridge rule as json.")
+add_assistant_message(messages, "```json")
+
+text = chat(messages, stop_sequences=["```"])
+print(text)
+
+json_obj = json.loads(text.strip())
+print(json_obj)

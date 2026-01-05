@@ -1,0 +1,29 @@
+[
+  {
+    "output": "\nimport re\nimport json\n\ndef parse_s3_uri(uri):\n    pattern = r'^s3://([a-z0-9.-]+)/(.+)$'\n    match = re.match(pattern, uri)\n    if match:\n        return {\n            \"bucket\": match.group(1),\n            \"key\": match.group(2)\n        }\n    return None\n\n# Test\nuri = \"s3://my-bucket/path/to/object\"\nresult = parse_s3_uri(uri)\nprint(json.dumps(result))\n",
+    "score": 8.0,
+    "test_case": {
+      "task": "Parse an AWS S3 bucket name and object key from an S3 URI in the format 's3://bucket-name/path/to/object'",
+      "format": "regex"
+    },
+    "reasoning": "The solution works for the basic happy path but lacks robustness for production use. The regex pattern is overly strict and doesn't align with AWS S3 naming rules. More importantly, there's no error handling to help users understand why a URI failed to parse. For a real-world AWS solution, consider using boto3's URI parsing utilities or implementing more comprehensive validation with informative error messages."
+  },
+  {
+    "output": "\n{\n  \"MyLambdaFunction\": {\n    \"Type\": \"AWS::Lambda::Function\",\n    \"Properties\": {\n      \"FunctionName\": \"my-lambda-function\",\n      \"Runtime\": \"python3.11\",\n      \"Role\": \"arn:aws:iam::123456789012:role/lambda-execution-role\",\n      \"Handler\": \"index.handler\",\n      \"Code\": {\n        \"ZipFile\": \"def handler(event, context):\\n    return {'statusCode': 200, 'body': 'Hello from Lambda'}\"\n      }\n    }\n  }\n}\n",
+    "score": 8.0,
+    "test_case": {
+      "task": "Create a JSON CloudFormation template snippet that defines an AWS Lambda function with basic properties including function name, runtime, and IAM role ARN",
+      "format": "json"
+    },
+    "reasoning": "The solution correctly demonstrates the basic CloudFormation Lambda function structure with valid syntax and all minimum required properties. However, it uses hardcoded values and inline code that are unsuitable for production templates. The template would benefit from parameterization and additional configuration properties commonly used in real-world scenarios."
+  },
+  {
+    "output": "\nimport json\n\ndef get_region_name(region_code: str) -> str:\n    regions = {\n        \"us-east-1\": \"N. Virginia\",\n        \"us-east-2\": \"Ohio\",\n        \"us-west-1\": \"N. California\",\n        \"us-west-2\": \"Oregon\",\n        \"af-south-1\": \"Cape Town\",\n        \"ap-east-1\": \"Hong Kong\",\n        \"ap-south-1\": \"Mumbai\",\n        \"ap-northeast-1\": \"Tokyo\",\n        \"ap-northeast-2\": \"Seoul\",\n        \"ap-northeast-3\": \"Osaka\",\n        \"ap-southeast-1\": \"Singapore\",\n        \"ap-southeast-2\": \"Sydney\",\n        \"ca-central-1\": \"Canada\",\n        \"eu-central-1\": \"Frankfurt\",\n        \"eu-west-1\": \"Ireland\",\n        \"eu-west-2\": \"London\",\n        \"eu-west-3\": \"Paris\",\n        \"eu-south-1\": \"Milan\",\n        \"eu-north-1\": \"Stockholm\",\n        \"me-south-1\": \"Bahrain\",\n        \"sa-east-1\": \"S\u00e3o Paulo\"\n    }\n    return regions.get(region_code, \"Unknown region\")\n",
+    "score": 8.0,
+    "test_case": {
+      "task": "Write a Python function that takes an AWS region code and returns the corresponding region name (e.g., 'us-east-1' returns 'N. Virginia')",
+      "format": "python"
+    },
+    "reasoning": "The solution works correctly for the basic task and covers most common regions, but it's brittle and will become outdated as AWS adds new regions. A production solution should use boto3's EC2 client to fetch regions dynamically. The unused json import and lack of input validation are minor issues. For a simple utility function, this is acceptable; for production code, it needs improvement."
+  }
+]

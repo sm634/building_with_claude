@@ -1,0 +1,14 @@
+[
+  {
+    "task": "Parse an AWS S3 bucket name and object key from an S3 URI in the format 's3://bucket-name/path/to/object'",
+    "format": "regex"
+  },
+  {
+    "task": "Create a JSON CloudFormation template snippet that defines an AWS Lambda function with basic properties including function name, runtime, and IAM role ARN",
+    "format": "json"
+  },
+  {
+    "task": "Write a Python function that takes an AWS region code and returns the corresponding region name (e.g., 'us-east-1' returns 'N. Virginia')",
+    "format": "python"
+  }
+]
