@@ -1,0 +1,338 @@
+"""
+* Teach Claude to set reminders
+* Require us to implement 3-4 tools.
+    Tools we need:
+     - Get current data time
+     - Add duration to current date time
+     - Set a reminder
+"""
+from datetime import datetime, timedelta
+from dotenv import load_dotenv
+from anthropic.types import ToolParam, Message
+from anthropic import Anthropic
+import json
+import os
+
+_ = load_dotenv(override=True)
+
+
+# Instantiate client
+
+client = Anthropic()
+model = os.environ['CLAUDE_MODEL']
+
+
+################# Helper functions #################
+
+def add_user_message(messages, message):
+    user_message = {
+        "role": "user", 
+        "content": message.content if isinstance(message, Message) else message}
+    messages.append(user_message)
+
+
+def add_assistant_message(messages, message):
+    assistant_message = {
+        "role": "assistant", 
+        "content": message.content if isinstance(message, Message) else message}
+    messages.append(assistant_message)
+
+
+def run_batch(invocations=[]):
+    batch_output = []
+
+    for invocation in invocations:
+        name = invocation["name"]
+        args = json.loads(invocation["arguments"])
+
+        tool_output = run_tool(name, args)
+
+        batch_output.append({"tool_name": name, "output": tool_output})
+
+    return batch_output
+
+
+def run_tool(tool_name, tool_input):
+    """Runs the selected tool"""
+    if tool_name == "get_current_datetime":
+        return get_current_datetime(**tool_input)
+    elif tool_name == "add_duration_to_datetime":
+        return add_duration_to_datetime(**tool_input)
+    elif tool_name == "set_reminder":
+        return set_reminder(**tool_input)
+    elif tool_name == "batch_tool":
+        return run_batch(**tool_input)
+
+
+################## TOOL functions ##################
+def get_current_datetime(date_format="%Y-%m-%d %H:%M:%S"):
+    if not date_format:
+        raise ValueError("date_format must be provided")
+    return datetime.now().strftime(date_format)
+
+
+get_current_datetime_schema = ToolParam(
+    {
+    "name": "get_current_datetime",
+    "description": "Returns the current date and time formatted according to the specified format",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "date_format": {
+                "type": "string",
+                "description": "A string specifying the format of the returned datetime. Uses Python's strftime format codes.",
+                "default": "%Y-%m-%d %H:%M:%S"
+            }
+        },
+        "required": []
+    }
+}
+)
+
+
+def add_duration_to_datetime(
+    datetime_str, duration=0, unit="days", input_format="%Y-%m-%d"
+):
+    date = datetime.strptime(datetime_str, input_format)
+
+    if unit == "seconds":
+        new_date = date + timedelta(seconds=duration)
+    elif unit == "minutes":
+        new_date = date + timedelta(minutes=duration)
+    elif unit == "hours":
+        new_date = date + timedelta(hours=duration)
+    elif unit == "days":
+        new_date = date + timedelta(days=duration)
+    elif unit == "weeks":
+        new_date = date + timedelta(weeks=duration)
+    elif unit == "months":
+        month = date.month + duration
+        year = date.year + month // 12
+        month = month % 12
+        if month == 0:
+            month = 12
+            year -= 1
+        day = min(
+            date.day,
+            [
+                31,
+                29 if year % 4 == 0 and (year % 100 != 0 or year % 400 == 0) else 28,
+                31,
+                30,
+                31,
+                30,
+                31,
+                31,
+                30,
+                31,
+                30,
+                31,
+            ][month - 1],
+        )
+        new_date = date.replace(year=year, month=month, day=day)
+    elif unit == "years":
+        new_date = date.replace(year=date.year + duration)
+    else:
+        raise ValueError(f"Unsupported time unit: {unit}")
+
+    return new_date.strftime("%A, %B %d, %Y %I:%M:%S %p")
+
+
+def set_reminder(content, timestamp):
+    print(f"----\nSetting the following reminder for {timestamp}:\n{content}\n----")
+
+
+
+#################### TOOL schemas ##################
+
+add_duration_to_datetime_schema = {
+    "name": "add_duration_to_datetime",
+    "description": "Adds a specified duration to a datetime string and returns the resulting datetime in a detailed format. This tool converts an input datetime string to a Python datetime object, adds the specified duration in the requested unit, and returns a formatted string of the resulting datetime. It handles various time units including seconds, minutes, hours, days, weeks, months, and years, with special handling for month and year calculations to account for varying month lengths and leap years. The output is always returned in a detailed format that includes the day of the week, month name, day, year, and time with AM/PM indicator (e.g., 'Thursday, April 03, 2025 10:30:00 AM').",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "datetime_str": {
+                "type": "string",
+                "description": "The input datetime string to which the duration will be added. This should be formatted according to the input_format parameter.",
+            },
+            "duration": {
+                "type": "number",
+                "description": "The amount of time to add to the datetime. Can be positive (for future dates) or negative (for past dates). Defaults to 0.",
+            },
+            "unit": {
+                "type": "string",
+                "description": "The unit of time for the duration. Must be one of: 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', or 'years'. Defaults to 'days'.",
+            },
+            "input_format": {
+                "type": "string",
+                "description": "The format string for parsing the input datetime_str, using Python's strptime format codes. For example, '%Y-%m-%d' for ISO format dates like '2025-04-03'. Defaults to '%Y-%m-%d'.",
+            },
+        },
+        "required": ["datetime_str"],
+    },
+}
+
+set_reminder_schema = {
+    "name": "set_reminder",
+    "description": "Creates a timed reminder that will notify the user at the specified time with the provided content. This tool schedules a notification to be delivered to the user at the exact timestamp provided. It should be used when a user wants to be reminded about something specific at a future point in time. The reminder system will store the content and timestamp, then trigger a notification through the user's preferred notification channels (mobile alerts, email, etc.) when the specified time arrives. Reminders are persisted even if the application is closed or the device is restarted. Users can rely on this function for important time-sensitive notifications such as meetings, tasks, medication schedules, or any other time-bound activities.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "content": {
+                "type": "string",
+                "description": "The message text that will be displayed in the reminder notification. This should contain the specific information the user wants to be reminded about, such as 'Take medication', 'Join video call with team', or 'Pay utility bills'.",
+            },
+            "timestamp": {
+                "type": "string",
+                "description": "The exact date and time when the reminder should be triggered, formatted as an ISO 8601 timestamp (YYYY-MM-DDTHH:MM:SS) or a Unix timestamp. The system handles all timezone processing internally, ensuring reminders are triggered at the correct time regardless of where the user is located. Users can simply specify the desired time without worrying about timezone configurations.",
+            },
+        },
+        "required": ["content", "timestamp"],
+    },
+}
+
+batch_tool_schema = {
+    "name": "batch_tool",
+    "description": "Invoke multiple other tool calls simultaneously",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "invocations": {
+                "type": "array",
+                "description": "The tool calls to invoke",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "description": "The name of the tool to invoke",
+                        },
+                        "arguments": {
+                            "type": "string",
+                            "description": "The arguments to the tool, encoded as a JSON string",
+                        },
+                    },
+                    "required": ["name", "arguments"],
+                },
+            }
+        },
+        "required": ["invocations"],
+    },
+}
+
+pass
+
+article_summary_schema = {
+    "name": "article_summary",
+    "description": "Creates a summary of an article with its key insights. Use this tool when you need to generate a structured summary of an article, research paper, or any textual content. The tool requires the article's title, author name, and a list of the most important insights or takeaways from the content. Each insight should be a concise statement capturing a significant point from the article.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "title": {
+                "type": "string",
+                "description": "The title of the article being summarized.",
+            },
+            "author": {
+                "type": "string",
+                "description": "The name of the author who wrote the article.",
+            },
+            "key_insights": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "A list of the most important takeaways or insights from the article. Each insight should be a complete, concise statement.",
+            },
+        },
+        "required": ["title", "author", "key_insights"],
+    },
+}
+
+
+################## Chat and conversation functions ##################
+
+def chat(messages, system=None, temperature=0.0, max_tokens=1000, stop_sequences=[], tools=None, tool_choice=None):
+
+    params = {
+        "model": model,
+        "max_tokens": max_tokens,
+        "messages": messages,
+        "temperature": temperature,
+        "stop_sequences": stop_sequences
+    }
+
+    if tools:
+        params["tools"] = tools
+    if system:
+        params["system"] = system
+
+    message = client.messages.create(**params)
+    return message
+
+def text_from_message(message):
+    return "\n".join(
+        [block.text for block in message.content if block.type == "text"]
+    )
+
+
+def run_tools(message):
+    tool_requests = [
+        block for block in message.content if block.type == "tool_use"
+    ]
+    tool_result_blocks = []
+
+    for tool_request in tool_requests:
+
+            try:
+                tool_output = run_tool(tool_request.name, tool_request.input)
+                tool_result_block = {
+                    "type": "tool_result",
+                    "tool_use_id": tool_request.id,
+                    "content": json.dumps(tool_output),
+                    "is_error": False
+                }
+            except Exception as e:
+                tool_result_block = {
+                    "type": "tool_result",
+                    "tool_use_id": tool_request.id,
+                    "content": f"error: {e}",
+                    "is_error": True
+                }
+
+            tool_result_blocks.append(tool_result_block)
+
+    return tool_result_blocks     
+
+
+def run_conversation(messages):
+    while True:
+        response = chat(messages, tools=[
+            get_current_datetime_schema,
+            add_duration_to_datetime_schema,
+            set_reminder_schema
+            ])
+
+        add_assistant_message(messages, response)
+
+        if response.stop_reason != "tool_use":
+            break
+
+        tool_results = run_tools(response)
+        add_user_message(messages, tool_results)
+
+    return messages
+
+
+################## MAIN CODE ##################
+
+if __name__ == "__main__":
+
+    messages = []
+    add_user_message(
+        messages,
+        """Set two reminders for Jan 1, 2025 at 8AM:
+            * I have a doctors appointment
+            * Taxes are due
+        """
+    )
+
+    response = run_conversation(messages)
+    print(response)

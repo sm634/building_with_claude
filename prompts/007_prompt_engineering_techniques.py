@@ -657,12 +657,30 @@ if __name__ == "__main__":
     # This function is executed once for each test case
     def run_prompt(prompt_inputs):
         prompt = f"""
-            What should this person eat?
+        Generate a one-day meal plan for an athlete that meets their dietary restrictions.
 
+        <athlete_information>
             - Height: {prompt_inputs['height']}
             - Weight: {prompt_inputs['weight']}
             - Goal: {prompt_inputs['goal']}
             - Restrictions: {prompt_inputs['restrictions']}
+        </athlete_information>
+
+        Guidelines:
+        1. Include accurate daily calorie amount.
+        2. Show protein, fat, and carb amounts.
+        3. Specify when to eat each meal.
+        4. Use only foods that fit restrictions.
+        5. List all portion sizes in grams.
+        6. Keep budget-friendly if mentioned.
+
+        Follow these steps:
+        1. Calculate daily calories needed.
+        2. Figure out protein, fat, carb amounts.
+        3. Plan meal timing around workouts.
+        4. Choose foods that fit restrictions.
+        5. Set portion sizes in grams.
+        6. Adjust for budget if needed.
         """
 
         messages = []
