@@ -1,0 +1,97 @@
+[
+  {
+    "prompt_inputs": {
+      "height": "180 cm",
+      "weight": "75 kg",
+      "goal": "Endurance performance and muscle recovery",
+      "restrictions": "Vegetarian"
+    },
+    "solution_criteria": [
+      "Includes pre-workout, during-workout, and post-workout meals with appropriate timing",
+      "Meets vegetarian dietary restrictions across all meals",
+      "Provides adequate carbohydrates and protein for endurance athlete recovery"
+    ],
+    "task_description": "Write a compact, concise 1 day meal pln for an athelete",
+    "scenario": "Testing with pre/during/post-workout meal timing specifications for optimal performance and recovery"
+  },
+  {
+    "prompt_inputs": {
+      "height": "180 cm",
+      "weight": "68 kg",
+      "goal": "Marathon training - 42km race in 2 weeks",
+      "restrictions": "Lactose intolerant, vegetarian"
+    },
+    "solution_criteria": [
+      "Meal plan covers full day (breakfast, lunch, dinner, snacks) with appropriate timing for training",
+      "Macronutrient distribution supports endurance training (higher carbohydrates, adequate protein)",
+      "All meals respect lactose-free and vegetarian restrictions",
+      "Plan is compact and concise (under 400 words)"
+    ],
+    "task_description": "Write a compact, concise 1 day meal pln for an athelete",
+    "scenario": "Testing with a specific sport athlete (e.g., marathon runner) with particular caloric and macronutrient requirements"
+  },
+  {
+    "prompt_inputs": {
+      "height": "180",
+      "weight": "75",
+      "goal": "muscle gain with endurance training",
+      "restrictions": "vegetarian, no nuts"
+    },
+    "solution_criteria": [
+      "Meal plan covers 3 meals and 1-2 snacks across one full day",
+      "All ingredients are budget-friendly and commonly available at standard grocery stores",
+      "Provides adequate protein (minimum 1.6g per kg body weight) from vegetarian sources excluding nuts",
+      "Meals are practical to prepare with minimal cooking time for an athlete's schedule"
+    ],
+    "task_description": "Write a compact, concise 1 day meal pln for an athelete",
+    "scenario": "Testing with budget constraints where the meal plan must use affordable, accessible ingredients"
+  },
+  {
+    "prompt_inputs": {
+      "height": "180 cm",
+      "weight": "75 kg",
+      "goal": "muscle building with high protein intake",
+      "restrictions": "no access to oven or stove, lactose intolerant"
+    },
+    "solution_criteria": [
+      "All meals require no more than 10 minutes of preparation or use no-cook options",
+      "Meal plan meets high protein requirements suitable for muscle building",
+      "All foods comply with lactose-free restriction",
+      "Plan is presented as a single day with breakfast, lunch, snacks, and dinner"
+    ],
+    "task_description": "Write a compact, concise 1 day meal pln for an athelete",
+    "scenario": "Testing with minimal cooking time requirements for a busy athlete with limited kitchen access"
+  },
+  {
+    "prompt_inputs": {
+      "height": "178 cm",
+      "weight": "72 kg",
+      "goal": "Build muscle and increase endurance for competitive cycling",
+      "restrictions": "Vegan and gluten-free"
+    },
+    "solution_criteria": [
+      "Meal plan covers all three meals and includes snacks for sustained energy",
+      "All foods comply with vegan and gluten-free restrictions",
+      "Provides adequate protein and carbohydrates to support muscle building and endurance performance",
+      "Plan is compact and concise, fitting on a single page"
+    ],
+    "task_description": "Write a compact, concise 1 day meal pln for an athelete",
+    "scenario": "Testing with dietary restrictions (e.g., vegetarian, vegan, gluten-free) combined with athletic performance needs"
+  },
+  {
+    "prompt_inputs": {
+      "height": "180 cm",
+      "weight": "85 kg",
+      "goal": "Muscle building and strength gain",
+      "restrictions": "None"
+    },
+    "solution_criteria": [
+      "Meal plan covers all meals for one day (breakfast, lunch, dinner, snacks)",
+      "Each meal includes high-protein sources (minimum 25-35g protein per meal)",
+      "Total daily protein intake supports muscle building (approximately 1.6-2.2g per kg body weight)",
+      "Plan is compact and concise, presented in easy-to-follow format"
+    ],
+    "task_description": "Write a compact, concise 1 day meal pln for an athelete",
+    "scenario": "Testing with a strength/muscle-building focused athlete requiring high protein intake throughout the day"
+  }
+]
